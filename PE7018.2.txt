@@ -1,0 +1,515 @@
+
+!
+!
+!
+!
+no release description
+!
+!
+!
+!
+!
+!
+global synchronization option 2
+!
+!
+no release description
+!
+!release ID 2
+!
+!
+alarm-port 1 input 1 active low
+alarm-port 1 input 1 admin-state disabled
+alarm-port 1 input 1 severity critical
+no alarm-port 1 input 1 description
+alarm-port 1 input 2 active low
+alarm-port 1 input 2 admin-state disabled
+alarm-port 1 input 2 severity critical
+no alarm-port 1 input 2 description
+alarm-port 1 input 3 active low
+alarm-port 1 input 3 admin-state disabled
+alarm-port 1 input 3 severity critical
+no alarm-port 1 input 3 description
+!
+alarm-port 1 output 1 admin-state disabled
+no alarm-port 1 output 1 description
+!
+!
+netconf tls server admin-state disabled
+!
+context local
+!
+!
+
+!
+!
+ router-id 10.0.52.2
+!
+ interface LAG_to_PE7018.1 p2p
+  ip address 10.10.52.2/30
+!
+ interface LAG_to_PE7057 p2p
+  ip address 10.10.52.22/30
+!
+ interface LAG_to_PE7023 p2p
+  ip address 10.10.52.34/30
+!
+ interface MGMT
+  ip address 192.168.1.1/24
+!
+ interface lo_0 loopback
+  ip address 10.0.52.2/32
+!
+!
+!
+!
+ service ftp client
+ service ssh
+ service sftp
+ service telnet
+ service snmp server
+!
+ router bfd
+  interface LAG_to_PE7018.1
+   minimum transmit-interval 100
+   minimum receive-interval 100
+  interface LAG_to_PE7057
+   minimum transmit-interval 100
+   minimum receive-interval 100
+  interface LAG_to_PE7023
+   minimum transmit-interval 100
+   minimum receive-interval 100
+!
+ router isis 100
+  net 47.0001.1111.2110.0522.00
+  is type level-2-only
+  metric-style wide level-2
+  authentication key-chain SECRET
+  traffic-engineering level-2
+  address-family ipv4 unicast
+ !
+  interface LAG_to_PE7018.1
+   ! bind to link-group
+   circuit type level-2-only
+   hello padding never
+   address-family ipv4 unicast
+    lfa
+ !
+  interface LAG_to_PE7057
+   ! bind to link-group
+   circuit type level-2-only
+   hello padding never
+   address-family ipv4 unicast
+    lfa
+ !
+  interface LAG_to_PE7023
+   ! bind to link-group
+   circuit type level-2-only
+   hello padding never
+   address-family ipv4 unicast
+    lfa
+ !
+  interface lo_0
+   authentication key-chain SECRET
+   address-family ipv4 unicast
+!
+ key-chain SECRET key-id 1
+  key-string encrypted 5629E7CF048A42EE6D0FC2AA0BE83874
+!
+ router mpls
+  interface LAG_to_PE7023
+  interface LAG_to_PE7018.1
+  interface LAG_to_PE7057
+  interface lo_0
+!
+ router ldp
+  neighbor 10.0.52.1 targeted
+  interface LAG_to_PE7018.1
+  interface LAG_to_PE7057
+  interface LAG_to_PE7023
+  interface lo_0
+!
+ router bgp 64540
+  cluster-id 10.0.52.1
+  address-family ipv4 vpn
+   nexthop triggered delay 0 holdtime 1 backoff 0
+   ipfrr
+!
+  peer-group 1 internal
+   advertisement-interval 0
+   address-family ipv4 vpn
+    route-reflector-client
+!
+  neighbor 10.0.52.1 internal
+   advertisement-interval 0
+   update-source lo_0
+   send community
+   send ext-community
+   address-family ipv4 vpn
+!
+  neighbor 10.0.52.3 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610
+!
+  neighbor 10.0.52.4 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610
+!
+  neighbor 10.0.52.5 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610
+!
+  neighbor 10.0.52.6 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610 
+! 
+  neighbor 10.0.52.7 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610
+
+  neighbor 10.0.52.8 internal
+   peer-group 1
+   password encrypted 43BEA7BD50410610
+!
+!
+!
+!
+ logging console
+!
+ aaa authentication administrator console tacacs+ local
+ aaa authentication administrator vty tacacs+ local
+ aaa authentication administrator maximum sessions 5
+ aaa accounting administrator tacacs+
+ aaa accounting commands 0 tacacs+
+ tacacs+ server 10.147.32.21 encrypted-key C137205FF8F0A453604C6A3604B3E3A1 routing-context MGMT
+ tacacs+ server 10.147.32.22 encrypted-key C137205FF8F0A453604C6A3604B3E3A1 routing-context MGMT
+!
+!
+ administrator admin encrypted 2 $1$........$4GkLh4AGanhLs354.11aO2G/gAk0KCfZ1/qHC1zcR552WZcI.xrhHYdWgefuwlrCad08iQyWqDDUU1BC8Pmvn1
+  privilege start 10
+ administrator alexv encrypted 2 $1$........$i9Hvqey6UdFA2HglsxQvT9aIEGCLqGz3ruEwd20wsDZNe27w8Dzt37JOqCWCjTSUfXDJzQ0WzBnxGSJexxc0j/
+  privilege max 15
+ administrator andrey encrypted 2 $1$........$.R6hrjgFvpkiumfRJzm5cPqxfNVIDN1rQOcLTdNV4m1jlSUdxkqIyAICOYqAnGZD/EwL/K2LFQO7xWUKeIdrz0
+  privilege max 15
+ administrator eugene encrypted 2 $1$........$UwHj322jMYDFB8LR9AzL/jbDPx8XegJZLl6AffASAJC/09Lw7Whs4d2p8fehAEO7xTbDFy62SLbawJY6mLD5F0
+  privilege max 15
+ administrator gennshul encrypted 2 $1$........$yqnktY9aBhYMXF668f/fnvWqO9h.YyIN2LodhJgAEMSBVYZZ9EI35wKmfHaXjT4of8v6oI2CfAqF71ItR.7Kx0
+  privilege start 15
+  privilege max 15
+  command-access li-admin
+ administrator kirill encrypted 2 $1$........$zZQkTyg2Cfe4QTBp4wrmTqq0AQslZYpg9jJFOOX1SmsZcJE9IkU/5Dk8h0yTTVBsvO0O070YA4ZvpdwglHPuR/
+  privilege max 15
+ administrator nurba encrypted 2 $1$........$8RJ/Vx0cONg1twQwARQr1RMeRCcHipapw97ZyyR8Yj5mLITBZKfmP1zGgpzsFqF8/XkbGqpPX0PZ4W/xBpekC.
+  privilege max 15
+ administrator nurbmura encrypted 2 $6$gUmm/Urn$hZSejw8d1Fi1Luq7OAdd8hhdndPU7Q0dMY1b5/OgyRitejNwDGzG/nuQRA/V412pyEF04GRq5sSEK2C7OYPEI1
+  privilege max 15
+!
+!
+context MGMT 
+!
+!
+ interface lo_0 loopback
+  ip address 10.0.52.2/32
+  ip source-address tacacs+
+!
+ interface vlan902
+  ip address 10.149.22.6/30
+!
+!
+!
+!
+ service ftp client
+ service ssh
+ service sftp
+ service telnet
+ service snmp server
+
+!
+ ntp-mode
+!
+  server 172.18.22.247 version 3 prefer
+
+!
+ router bfd
+  neighbor 10.149.22.2
+   minimum transmit-interval 100
+   minimum receive-interval 100
+   detection-multiplier 3
+!
+ router bgp vpn
+  multi-paths external 2
+  address-family ipv4 unicast
+   export
+    route-target 48503:200
+   import
+    route-target 48503:200
+   redistribute connected
+   redistribute static
+!
+  neighbor 10.149.22.2 external
+   remote-as 48503
+   next-hop-self
+   bfd
+   address-family ipv4 unicast
+!
+!
+!
+!
+ no logging console
+!
+!
+!
+context mobile-access vpn-rd 10.0.51.8:100
+!
+!
+
+!
+!
+ interface lo_1 loopback
+  description sla job
+  ip address 10.0.51.8/32
+!
+ interface vlan903
+  ip address 10.149.122.6/30
+!
+!
+!
+!
+!
+ router bfd
+  interface vlan903
+   minimum transmit-interval 100
+   minimum receive-interval 100
+   detection-multiplier 3
+!
+ router bgp vpn
+  multi-paths external 2
+  address-family ipv4 unicast
+   export
+    route-target 48503:100
+   import
+    route-target 48503:100
+   redistribute connected
+!
+  neighbor 10.149.120.5 external
+   remote-as 48503
+   next-hop-self
+   bfd
+   address-family ipv4 unicast
+!
+!
+!
+!
+ no logging console
+!
+!
+!
+! 
+!
+!
+! ** End Context **
+!
+!
+ipv4 enable-fragment
+!
+!load balancing hash key config
+service load-balance link-group layer-4
+!
+!
+!
+!
+qos policy 10G pwfq
+ rate pir 10000000
+ rate cir 10000000
+ num-queues 8
+ queue 0 priority 0 strict-priority 0
+ queue 1 priority 0 strict-priority 1
+ queue 2 priority 0 strict-priority 2
+ queue 3 priority 0 strict-priority 3
+ queue 4 priority 4 weight 30
+ queue 5 priority 4 weight 10
+ queue 6 priority 4 weight 10
+ queue 7 priority 4 weight 10
+!
+qos policy 1G pwfq
+ rate pir 1000000
+ rate cir 1000000
+ num-queues 8
+ queue 0 priority 0 strict-priority 0
+ queue 1 priority 0 strict-priority 1
+ queue 2 priority 0 strict-priority 2
+ queue 3 priority 0 strict-priority 3
+ queue 4 priority 4 weight 30
+ queue 5 priority 4 weight 10
+ queue 6 priority 4 weight 10
+ queue 7 priority 4 weight 10
+!
+link-group LAG_NE40.2
+ description LAG NE40_2
+ no shutdown
+ encapsulation dot1q
+ qos pwfq scheduling physical-port
+ lacp active
+ qos policy queuing 10G
+ dot1q pvc 902
+  bind interface vlan902 MGMT
+ dot1q pvc 903
+  bind interface vlan903 mobile-access
+ service-instance 1092
+  match
+   dot1q 1092
+!
+link-group LAG_to_KO4008
+ description LAG to KO4008
+ no shutdown
+ qos pwfq scheduling physical-port
+ lacp active
+ bind interface LAG_to_KO4008 local
+ qos policy queuing 10G
+!
+link-group LAG_to_KO5025
+ description LAG to KO5025
+ no shutdown
+ qos pwfq scheduling physical-port
+ lacp active
+ bind interface LAG_to_KO5025 local
+ qos policy queuing 10G
+!
+link-group LAG_to_KOTR01.1
+ description LAG to KOTR01.1
+ no shutdown
+ qos pwfq scheduling physical-port
+ lacp active
+ bind interface LAG_to_KOTR01.1 local
+ qos policy queuing 10G
+! Pseudowire peer-profile configuration
+pseudowire peer-profile KO4004
+ peer 10.0.51.9
+  tunnel lsp ldp
+  vc-type vlan
+!
+! Pseudowire instance configuration
+pseudowire instance 1092
+ pw-id 1092
+ peer-profile KO4004 mpls
+!
+!
+!
+!
+!
+!
+ system clock timezone AST 6 0 local
+!
+!
+card lc-1-10ge-20-8-port 1
+!
+port ethernet 1/9 10ge
+ description NE40.1 2/0/6
+ no shutdown
+ link-group LAG_NE40.2
+!
+port ethernet 1/10 10ge
+ description NE40.1 2/0/7
+ no shutdown
+ link-group LAG_NE40.2
+!
+port ethernet 1/11 10ge
+ description NE40.1 2/0/8
+ no shutdown
+ link-group LAG_NE40.2
+!
+port ethernet 1/12 10ge
+ description KOTR01.1 p12
+ no shutdown
+ link-group LAG_to_KOTR01.1
+!
+port ethernet 1/13 10ge
+ description KOTR01.1 p13
+ no shutdown
+ link-group LAG_to_KOTR01.1
+!
+port ethernet 1/14 10ge
+ description RING1 to KO5025 p10
+ no shutdown
+ link-group LAG_to_KO5025
+!
+port ethernet 1/15 10ge
+ description RING2 to KO4008 p10
+ no shutdown
+ link-group LAG_to_KO4008
+!
+!
+port ethernet management
+ no shutdown
+ bind interface MGMT local
+!
+banner login c KOTR01.2 c
+!
+ipv6 path-mtu-discovery discovery-interval 600
+!
+system hostname SPR-KOTR01.2
+!
+tcp path-mtu-discovery
+!
+!
+snmp server enhance ifmib
+ traps ifmib encaps
+ traps ifmib ip
+snmp view all internet included
+snmp view cacti internet included
+snmp view cacti interfaces included
+snmp view cacti snmp included
+snmp view cacti ifMIB included
+snmp view Inet-View internet included
+snmp view Everything internet included
+snmp view restricted system included
+snmp view restricted snmp included
+snmp view restricted snmpEngine included
+snmp view restricted snmpMPDStats included
+snmp view restricted usmStats included
+snmp community public view Inet-View
+snmp group group1 security-model usm noauth all-contexts read Inet-View write Inet-View notify Inet-View
+snmp group group1 security-model usm priv all-contexts read Inet-View write Inet-View notify Inet-View
+snmp user admin_use security-model usm noauth
+snmp user admin_user group group1 security-model usm md5 key encoded base64 WrkP2M+J/shMN0+5hiYYjQ== des56 WrkP2M+J/shMN0+5hiYYjQ==
+snmp target soem16 172.18.23.104 address-context "MGMT" security-name admin_user version 3 security-level priv group group1 view Inet-View
+!
+xc-group KO7020_reserve
+! Pseudowire cross-connects
+ xc lg LAG_NE40.2 service-instance 1092 to pseudowire instance 1092
+!
+!
+licensing
+ fingerprint TU8SA21337
+pm pm-job pmJob
+  measurement-reader pw_profile
+    pm-group-ref ces-pw-history
+  measurement-reader pdh_profile
+    pm-group-ref tdm1001-pdh-history
+  measurement-reader port_profile
+    pm-group-ref port-history
+  measurement-reader dot1q_profile
+    pm-group-ref dot1q-history
+  measurement-reader global_profile
+    pm-group-ref global
+  measurement-reader ethernet_profile
+    pm-group-ref tdm1001-Ethernet-port-history
+  measurement-reader link_group_profile
+    pm-group-ref link-group-history
+pm pm-job pmJob24
+  reporting-period one-day
+  granularity-period one-day
+  measurement-reader pw_profile
+    pm-group-ref ces-pw-history
+  measurement-reader pdh_profile
+    pm-group-ref tdm1001-pdh-history
+  measurement-reader port_profile
+    pm-group-ref port-history
+  measurement-reader dot1q_profile
+    pm-group-ref dot1q-history
+  measurement-reader global_profile
+    pm-group-ref global
+  measurement-reader ethernet_profile
+    pm-group-ref tdm1001-Ethernet-port-history
+  measurement-reader link_group_profile
+    pm-group-ref link-group-history

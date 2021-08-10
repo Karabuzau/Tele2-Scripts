@@ -1,0 +1,565 @@
+service multiple-contexts
+!
+!
+!
+qos class-map ein-default-dscp-to-dp ip in
+ ip 1 to qos 0
+ ip 2 to qos 0
+ ip 3 to qos 0
+ ip 4 to qos 0
+ ip 5 to qos 0
+ ip 6 to qos 0
+ ip 7 to qos 0
+ ip 9 to qos 8
+ ip 10 to qos 8
+ ip 11 to qos 8
+ ip 13 to qos 12
+ ip 15 to qos 14
+ ip 17 to qos 16
+ ip 18 to qos 16
+ ip 19 to qos 16
+ ip 21 to qos 20
+ ip 23 to qos 22
+ ip 25 to qos 24
+ ip 26 to qos 24
+ ip 27 to qos 24
+ ip 29 to qos 28
+ ip 31 to qos 30
+ ip 33 to qos 32
+ ip 34 to qos 24
+ ip 35 to qos 32
+ ip 37 to qos 36
+ ip 39 to qos 38
+ ip 41 to qos 40
+ ip 42 to qos 40
+ ip 43 to qos 40
+ ip 44 to qos 40
+ ip 45 to qos 40
+ ip 47 to qos 46
+ ip 49 to qos 48
+ ip 50 to qos 48
+ ip 51 to qos 48
+ ip 52 to qos 48
+ ip 53 to qos 48
+ ip 54 to qos 48
+ ip 55 to qos 48
+ ip 57 to qos 56
+ ip 58 to qos 56
+ ip 59 to qos 56
+ ip 60 to qos 56
+ ip 61 to qos 56
+ ip 62 to qos 56
+ ip 63 to qos 56
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+no release description
+!
+!
+!
+!
+!
+!
+global synchronization option 2
+!
+!
+no release description
+!
+!release ID 2
+!
+!
+alarm-port 1 input 1 active low
+alarm-port 1 input 1 admin-state disabled
+alarm-port 1 input 1 severity critical
+no alarm-port 1 input 1 description
+alarm-port 1 input 2 active low
+alarm-port 1 input 2 admin-state disabled
+alarm-port 1 input 2 severity critical
+no alarm-port 1 input 2 description
+alarm-port 1 input 3 active low
+alarm-port 1 input 3 admin-state disabled
+alarm-port 1 input 3 severity critical
+no alarm-port 1 input 3 description
+!
+alarm-port 1 output 1 admin-state disabled
+no alarm-port 1 output 1 description
+!
+!
+netconf tls server admin-state disabled 
+
+context local
+!
+!
+
+!
+!
+ router-id 10.0.52.4
+!
+ interface LAG_to_PE5009 p2p  
+  ip address 10.10.52.10/30
+!
+ interface LAG_to_PE4002 p2p
+  ip address 10.10.52.13/30  
+!
+ interface MGMT
+  ip address 192.168.1.1/24 
+!
+ interface lo_0 loopback
+  ip address 10.0.52.4/32
+!
+!
+!
+!
+ service ftp client
+ service ssh
+ service sftp
+ service scp
+ service telnet
+ service snmp server
+!
+ router bfd
+  interface LAG_to_PE5009
+   minimum transmit-interval 100
+   minimum receive-interval 100
+  interface LAG_to_PE4002
+   minimum transmit-interval 100
+   minimum receive-interval 100
+ 
+!
+ router isis 100
+  net 47.0001.1111.2110.0524.00
+  is type level-2-only
+  metric-style wide level-2
+  authentication key-chain SECRET
+  traffic-engineering level-2
+  address-family ipv4 unicast
+ !
+  interface LAG_to_PE5009
+   ! bind to link-group
+   circuit type level-2-only
+   hello padding never
+   address-family ipv4 unicast
+    lfa
+ !
+  interface LAG_to_PE4002
+   ! bind to link-group
+   circuit type level-2-only
+   hello padding never
+   address-family ipv4 unicast
+    lfa
+ !
+  
+  interface lo_0
+   authentication key-chain SECRET
+   address-family ipv4 unicast
+!
+ key-chain SECRET key-id 1
+  key-string encrypted 5629E7CF048A42EE6D0FC2AA0BE83874
+!
+ router mpls
+  interface LAG_to_PE5009
+  interface LAG_to_PE4002
+  interface lo_0
+!
+ router ldp
+  ipfrr
+  interface LAG_to_PE5009
+  interface LAG_to_PE4002
+  interface lo_0
+!
+ router bgp 64540
+  
+!
+  neighbor 10.0.52.1 internal 
+   password encrypted 43BEA7BD50410610
+   update-source lo_0
+   send community
+   send ext-community
+   no address-family ipv4 unicast
+   address-family ipv4 vpn
+!
+  neighbor 10.0.52.2 internal 
+   password encrypted 43BEA7BD50410610
+   update-source lo_0
+   send community
+   send ext-community
+   no address-family ipv4 unicast
+   address-family ipv4 vpn
+!
+  
+!
+
+!
+!
+!
+ logging console
+!
+ aaa authentication administrator console tacacs+ local
+ aaa authentication administrator vty tacacs+ local
+ aaa authentication administrator maximum sessions 5
+ aaa accounting administrator tacacs+
+ aaa accounting commands 0 tacacs+
+ tacacs+ server 10.147.32.21 encrypted-key C137205FF8F0A453604C6A3604B3E3A1 routing-context MGMT
+ tacacs+ server 10.147.32.22 encrypted-key C137205FF8F0A453604C6A3604B3E3A1 routing-context MGMT
+!
+! 
+administrator admin encrypted 2 $1$........$4GkLh4AGanhLs354.11aO2G/gAk0KCfZ1/qHC1zcR552WZcI.xrhHYdWgefuwlrCad08iQyWqDDUU1BC8Pmvn1
+  privilege start 10
+ administrator alexv encrypted 2 $1$........$i9Hvqey6UdFA2HglsxQvT9aIEGCLqGz3ruEwd20wsDZNe27w8Dzt37JOqCWCjTSUfXDJzQ0WzBnxGSJexxc0j/
+  privilege max 15
+ administrator andrey encrypted 2 $1$........$.R6hrjgFvpkiumfRJzm5cPqxfNVIDN1rQOcLTdNV4m1jlSUdxkqIyAICOYqAnGZD/EwL/K2LFQO7xWUKeIdrz0
+  privilege max 15
+ administrator eugene encrypted 2 $1$........$UwHj322jMYDFB8LR9AzL/jbDPx8XegJZLl6AffASAJC/09Lw7Whs4d2p8fehAEO7xTbDFy62SLbawJY6mLD5F0
+  privilege max 15
+ administrator gennshul encrypted 2 $1$........$yqnktY9aBhYMXF668f/fnvWqO9h.YyIN2LodhJgAEMSBVYZZ9EI35wKmfHaXjT4of8v6oI2CfAqF71ItR.7Kx0
+  privilege start 15
+  privilege max 15
+  command-access li-admin
+ administrator kirill encrypted 2 $1$........$zZQkTyg2Cfe4QTBp4wrmTqq0AQslZYpg9jJFOOX1SmsZcJE9IkU/5Dk8h0yTTVBsvO0O070YA4ZvpdwglHPuR/
+  privilege max 15
+ administrator nurba encrypted 2 $1$........$8RJ/Vx0cONg1twQwARQr1RMeRCcHipapw97ZyyR8Yj5mLITBZKfmP1zGgpzsFqF8/XkbGqpPX0PZ4W/xBpekC.
+  privilege max 15
+ administrator nurbmura encrypted 2 $6$gleilIZj$lTeelbrlP9Ri39eApwynQEr/L75gfYWnmXRIN.kvMgbk9CjM3RmOlRml5F61PncJ94QhQUEYGFn7tNk65Ov3t0
+  privilege max 15
+
+context MGMT 
+
+interface lo_0 loopback
+  ip address 10.0.52.4/32
+  ip source-address tacacs+ syslog 
+
+
+
+!
+!
+!
+!
+ service ftp client
+ service ssh
+ service sftp
+ service scp
+ service telnet
+ service snmp server
+
+!
+ ntp-mode
+!
+  server 172.18.22.247 version 3 prefer
+
+!
+ router bgp vpn
+  multi-paths external 2
+  address-family ipv4 unicast
+   export
+    route-target 48503:200
+   import
+    route-target 48503:200
+   redistribute connected
+   redistribute static
+
+!
+!
+!
+!
+ no logging console
+!
+!
+!
+
+
+
+context mobile-access 
+!
+!
+
+!
+!
+ interface lo_1 loopback
+  description sla job
+  ip address 10.0.52.4/32
+!
+ interface vlan1086
+  ip address 10.100.42.179/29
+  dhcp relay 65535
+   giaddr 10.100.42.179
+!
+ interface vlan1152
+  ip address 10.100.44.195/29
+  dhcp relay 65535
+   giaddr 10.100.44.195
+!
+ interface vlan1153
+  ip address 10.100.44.203/29
+  dhcp relay 65535
+   giaddr 10.100.44.203
+!
+ interface vlan1301
+  ip address 10.100.49.107/29
+  dhcp relay 65535
+   giaddr 10.100.49.107
+! 
+ interface vlan1312
+  ip address 10.100.49.195/29
+  dhcp relay 65535
+   giaddr 10.100.49.195
+! 
+ interface vlan1314
+  ip address 10.100.49.211/29
+  dhcp relay 65535
+   giaddr 10.100.49.211
+!  
+interface vlan1406
+  ip address 10.100.52.179/29
+  dhcp relay 65535
+   giaddr 10.100.52.179
+!  
+interface vlan1411
+  ip address 10.100.52.219/29
+  dhcp relay 65535
+   giaddr 10.100.52.219
+!
+ interface vlan1413
+  ip address 10.100.52.235/29
+  dhcp relay 65535
+   giaddr 10.100.52.235 
+!
+interface vlan1701
+  ip address 10.100.61.235/29
+  dhcp relay 65535
+   giaddr 10.100.61.235
+!  
+interface vlan1712
+  ip address 10.100.62.67/29
+  dhcp relay 65535
+   giaddr 10.100.62.67
+!
+ interface vlan1714
+  ip address 10.100.62.83/29
+  dhcp relay 65535
+   giaddr 10.100.62.83 
+!
+ interface vlan1911
+  ip address 10.100.46.99/27
+  dhcp relay 65535
+   giaddr  10.100.46.99
+! 
+ interface vlan1913
+  ip address 10.100.46.163/27
+  dhcp relay 65535
+   giaddr  10.100.46.163
+! 
+interface vlan2152
+  ip address 10.100.4.195/29
+  dhcp relay 65535
+   giaddr 10.100.4.195
+!
+ interface vlan2153
+  ip address 10.100.4.203/29
+  dhcp relay 65535
+   giaddr 10.100.4.203
+! 
+interface vlan2301
+  ip address 10.100.9.107/29
+  dhcp relay 65535
+   giaddr 10.100.9.107
+! 
+interface vlan2312
+  ip address 10.100.9.195/29
+  dhcp relay 65535
+   giaddr 10.100.9.195
+!
+ interface vlan2314
+  ip address 10.100.9.211/29
+  dhcp relay 65535
+   giaddr 10.100.9.211
+! 
+interface vlan2406
+  ip address 10.100.12.179/29
+  dhcp relay 65535
+   giaddr 10.100.12.179
+! 
+interface vlan2411
+  ip address 10.100.12.219/29
+  dhcp relay 65535
+   giaddr 10.100.12.219
+! 
+interface vlan2413
+  ip address 10.100.12.235/29
+  dhcp relay 65535
+   giaddr 10.100.12.235
+! 
+interface vlan2701
+  ip address 10.100.21.235/29
+  dhcp relay 65535
+   giaddr 10.100.21.235
+! 
+interface vlan2712
+  ip address 10.100.22.67/29
+  dhcp relay 65535
+   giaddr 10.100.22.67
+! 
+interface vlan2714
+  ip address 10.100.22.83/29
+  dhcp relay 65535
+   giaddr 10.100.22.83  
+! 
+interface vlan2806
+  ip address 10.100.25.51/29
+  dhcp relay 65535
+   giaddr 10.100.25.51
+! 
+interface vlan2811
+  ip address 10.100.25.91/29
+  dhcp relay 65535
+   giaddr 10.100.25.91
+! 
+interface vlan2813
+  ip address 10.100.25.107/29
+  dhcp relay 65535
+   giaddr 10.100.25.107 
+! 
+interface vlan2813
+  ip address 10.100.25.107/29
+  dhcp relay 65535
+   giaddr 10.100.25.107  
+! 
+interface vlan2911
+  ip address 10.100.28.123/29
+  dhcp relay 65535
+   giaddr 10.100.28.123
+! 
+interface vlan2913
+  ip address 10.100.28.139/29
+  dhcp relay 65535
+   giaddr 10.100.28.139
+! 
+interface vlan3301
+  ip address 10.100.83.19/28
+  dhcp relay 65535
+   giaddr 10.100.83.19
+! 
+interface vlan3312
+  ip address 10.100.83.195/28
+  dhcp relay 65535
+   giaddr 10.100.83.195 
+! 
+interface vlan3314
+  ip address 10.100.83.227/28
+  dhcp relay 65535
+   giaddr 10.100.83.227
+! 
+interface vlan3701
+  ip address 10.100.74.19/28
+  dhcp relay 65535
+   giaddr 10.100.74.19
+! 
+interface vlan3806
+  ip address 10.100.228.99/28
+  dhcp relay 65535
+   giaddr 10.100.228.99
+! 
+interface vlan3811
+  ip address 10.100.228.179/28
+  dhcp relay 65535
+   giaddr 10.100.228.179
+! 
+interface vlan3813
+  ip address 10.100.83.195/28
+  dhcp relay 65535
+   giaddr 10.100.83.195 
+
+
+!
+router bgp vpn
+  address-family ipv4 unicast
+   export
+    route-target 48503:100
+   import
+    route-target 48503:100
+   redistribute connected
+!
+
+!
+!
+ dhcp relay server 172.20.9.33
+!
+ dhcp relay server 172.20.9.153
+!
+ dhcp relay server 172.20.10.33
+!
+ dhcp relay server 172.20.24.170
+!
+ dhcp relay server 172.20.25.20
+!
+!
+!
+ no logging console
+!
+!
+!
+
+
+qos policy 10G pwfq
+ rate pir 10000000
+ rate cir 10000000
+ num-queues 8
+ queue 0 priority 0 strict-priority 0
+ queue 1 priority 0 strict-priority 1
+ queue 2 priority 0 strict-priority 2
+ queue 3 priority 0 strict-priority 3
+ queue 4 priority 4 weight 30
+ queue 5 priority 4 weight 10
+ queue 6 priority 4 weight 10
+ queue 7 priority 4 weight 10
+!
+qos policy 1G pwfq
+ rate pir 1000000
+ rate cir 1000000
+ num-queues 8
+ queue 0 priority 0 strict-priority 0
+ queue 1 priority 0 strict-priority 1
+ queue 2 priority 0 strict-priority 2
+ queue 3 priority 0 strict-priority 3
+ queue 4 priority 4 weight 30
+ queue 5 priority 4 weight 10
+ queue 6 priority 4 weight 10
+ queue 7 priority 4 weight 10
+!
+
+!
+link-group LAG_to_PE5009
+ description LAG to PE5009
+ no shutdown
+ qos pwfq scheduling physical-port
+ lacp active
+ bind interface LAG_to_PE5009 local
+ qos policy queuing 10G
+!
+link-group LAG_to_PE4002
+ description LAG to PE4002
+ no shutdown
+ qos pwfq scheduling physical-port
+ lacp active
+ bind interface LAG_to_PE4002 local
+ qos policy queuing 10G
+!
+
+!
+port ethernet management
+ no shutdown
+ bind interface MGMT local
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
